@@ -8,10 +8,15 @@ const scripts = [
     script: 'tasks/echo-with-validation.ts',
     input: JSON.stringify({ id: `${i}`, name: `some name ${i}` }),
   }),
+
+  // no input
+  () => ({
+    script: 'tasks/echo-with-validation.ts',
+  }),
 ];
 
 // const total = 5;
-const batchSize = 50;
+const batchSize = 2;
 
 let counter = 0;
 

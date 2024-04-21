@@ -1,16 +1,15 @@
 import type { Static, TSchema } from '@sinclair/typebox';
 import { Value } from '@sinclair/typebox/value';
 
-let res = '';
+let res: string | null | void = null;
 
 export const input = async <T extends TSchema>(
   schema?: T
 ): Promise<Static<T>> => {
-  if (res === '') {
-    for await (const line of console) {
-      res += line;
-    }
+  // @todo: reader can be used to detect stdin exists
+  res = await Promise.race([Bun.sleep(100), Bun.stdin.text()]);
 
+  if (res != null) {
     try {
       res = JSON.parse(res);
     } catch {

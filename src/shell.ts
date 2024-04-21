@@ -3,10 +3,10 @@ import { $ } from 'bun';
 export const exec = async (command: string, input: string | null) => {
   $.nothrow();
 
-  const res = await $(
-    { raw: [`${command} < `, ''] } as unknown as TemplateStringsArray,
-    Buffer.from(input ?? '')
-  ); //.quiet();
+  const res =
+    input != null
+      ? await $({ raw: [`${command} < `, ''] } as never, Buffer.from(input))
+      : await $({ raw: [`${command}`] } as never);
 
   if (res.exitCode) {
     return {
@@ -28,3 +28,15 @@ export const exec = async (command: string, input: string | null) => {
     };
   }
 };
+
+/*
+await exec(
+  'bun run ./tasks/echo-with-validation.ts',
+  JSON.stringify({
+    id: '1',
+    name: 'some name 1',
+  })
+);
+
+await exec('bun run ./tasks/no-input.ts', null);
+*/
