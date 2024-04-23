@@ -11,8 +11,8 @@ export const exec = async (command: string, input: string | null) => {
   if (res.exitCode) {
     return {
       type: 'error',
-      error: res.stderr.toString(),
-      data: res.text(),
+      error: res.stderr.toString().trimEnd(),
+      data: res.text().trimEnd(),
     };
   }
 
@@ -24,19 +24,7 @@ export const exec = async (command: string, input: string | null) => {
   } catch {
     return {
       type: 'text',
-      data: res.text(),
+      data: res.text().trimEnd(),
     };
   }
 };
-
-/*
-await exec(
-  'bun run ./tasks/echo-with-validation.ts',
-  JSON.stringify({
-    id: '1',
-    name: 'some name 1',
-  })
-);
-
-await exec('bun run ./tasks/no-input.ts', null);
-*/

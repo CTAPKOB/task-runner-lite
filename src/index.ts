@@ -44,7 +44,7 @@ while (true) {
   const { id, input, script } = res[0];
 
   console.log('Start', id, script, input);
-  const output = await exec(`bun run ${script}`, input);
+  const output = await exec(script, input);
   console.log('Done', id, script, output);
 
   const update = await db

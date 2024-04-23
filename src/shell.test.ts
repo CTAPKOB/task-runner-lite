@@ -8,7 +8,7 @@ test('json, valid input', async () => {
   };
 
   const res = await exec(
-    'bun run ./tasks/echo-with-validation.ts',
+    'bun run ./src/task-fixtures/echo-with-validation.ts',
     JSON.stringify(input)
   );
 
@@ -25,7 +25,7 @@ test('shell json, invalid input', async () => {
   };
 
   const res = await exec(
-    'bun run ./tasks/echo-with-validation.ts',
+    'bun run ./src/task-fixtures/echo-with-validation.ts',
     JSON.stringify(input)
   );
 
@@ -33,18 +33,35 @@ test('shell json, invalid input', async () => {
 });
 
 test('shell json, no input', async () => {
-  const res = await exec('bun run ./tasks/echo-with-validation.ts', null);
+  const res = await exec(
+    'bun run ./src/task-fixtures/echo-with-validation.ts',
+    null
+  );
 
   expect(res.type).toEqual('error');
 });
 
 test('shell no input', async () => {
-  const res = await exec('bun run ./tasks/no-input.ts', null);
+  const res = await exec('bun run ./src/task-fixtures/no-input.ts', null);
 
   expect(res.data).toEqual('HELLO');
 });
 
 test('shell string input', async () => {
-  const res = await exec('bun run ./tasks/string-input.ts', 'world');
+  const res = await exec(
+    'bun run ./src/task-fixtures/string-input.ts',
+    'world'
+  );
   expect(res.data).toEqual('world');
+});
+
+test('bash', async () => {
+  const res = await exec('echo "hello"', null);
+  expect(res.data).toEqual('hello');
+});
+
+test('bash', async () => {
+  const res = await exec(`bash -c "cat <<EOF\nhel\\"ldddo\nEOF"`, null);
+
+  console.log('EEE', res);
 });

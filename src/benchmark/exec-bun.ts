@@ -5,13 +5,13 @@ import type { BatchItem } from 'drizzle-orm/batch';
 
 const scripts = [
   (i: number) => ({
-    script: 'tasks/echo-with-validation.ts',
+    script: 'bun run tasks/echo-with-validation.ts',
     input: JSON.stringify({ id: `${i}`, name: `some name ${i}` }),
   }),
 
   // no input
   () => ({
-    script: 'tasks/echo-with-validation.ts',
+    script: 'bun run tasks/echo-with-validation.ts',
   }),
 ];
 
