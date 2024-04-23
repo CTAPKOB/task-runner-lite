@@ -5,8 +5,11 @@ export const exec = async (command: string, input: string | null) => {
 
   const res =
     input != null
-      ? await $({ raw: [`${command} < `, ''] } as never, Buffer.from(input))
-      : await $({ raw: [`${command}`] } as never);
+      ? await $(
+          { raw: [`${command} < `, ''] } as never,
+          Buffer.from(input)
+        ).quiet()
+      : await $({ raw: [`${command}`] } as never).quiet();
 
   if (res.exitCode) {
     return {

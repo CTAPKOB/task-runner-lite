@@ -1,5 +1,5 @@
 import { Type } from '@sinclair/typebox';
-import { input, output } from '~/in-out';
+import { request, response } from '~/runtime';
 
 const Input = Type.Object({
   id: Type.String(),
@@ -7,6 +7,6 @@ const Input = Type.Object({
 });
 
 // Validated Input
-const args = await input(Input);
+const args = await request(Input);
 
-output(args);
+response(args);

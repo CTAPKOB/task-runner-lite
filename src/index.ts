@@ -1,7 +1,7 @@
 import { db } from './db/db';
 import { tasks } from './db/schema';
 import { eq } from 'drizzle-orm/sqlite-core/expressions';
-import { exec } from './shell';
+import { exec } from './queue/shell';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const sleepTimeout = 100;

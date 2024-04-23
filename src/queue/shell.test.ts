@@ -52,7 +52,16 @@ test('shell string input', async () => {
     'bun run ./src/task-fixtures/string-input.ts',
     'world'
   );
+
   expect(res.data).toEqual('world');
+});
+
+test('multiple input calls give same result', async () => {
+  const res = await exec(
+    'bun run ./src/task-fixtures/multi-input.ts',
+    JSON.stringify({ a: 1 })
+  );
+  expect(res.data).toEqual({ result: true });
 });
 
 test('bash', async () => {
@@ -62,6 +71,5 @@ test('bash', async () => {
 
 test('bash', async () => {
   const res = await exec(`bash -c "cat <<EOF\nhel\\"ldddo\nEOF"`, null);
-
-  console.log('EEE', res);
+  expect(res.data).toEqual('hel"ldddo');
 });

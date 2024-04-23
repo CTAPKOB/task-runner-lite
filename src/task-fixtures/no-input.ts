@@ -1,8 +1,8 @@
-import { input, output } from '~/in-out';
+import { request, response } from '~/runtime';
 import assert from 'assert';
 
-const args = await input();
+const args = await request();
 
 assert(args == null, 'args should be null');
 
-output('HELLO');
+response('HELLO');
