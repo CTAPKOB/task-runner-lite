@@ -4,6 +4,7 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/node": "^20.12.7",
     "drizzle-kit": "^0.20.17"
   },
   "peerDependencies": {
@@ -12,7 +13,8 @@
   "dependencies": {
     "@libsql/client": "^0.6.0",
     "@sinclair/typebox": "^0.32.22",
-    "drizzle-orm": "^0.30.8"
+    "drizzle-orm": "^0.30.8",
+    "zx": "^8.0.2"
   },
   "scripts": {
     "create-migration": "bun drizzle-kit generate:sqlite",

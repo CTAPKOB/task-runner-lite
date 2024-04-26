@@ -1,10 +1,10 @@
 import { db } from './db/db';
 import { tasks } from './db/schema';
 import { eq } from 'drizzle-orm/sqlite-core/expressions';
-import { exec } from './queue/shell';
+import { exec } from './queue/shell-zx';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const sleepTimeout = 100;
+const sleepTimeout = 0;
 
 const TASK_CREATED = 0;
 const TASK_RUNNING = 1;

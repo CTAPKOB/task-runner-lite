@@ -11,7 +11,7 @@ const scripts = [
 
   // no input
   () => ({
-    script: 'bun run tasks/echo-with-validation.ts',
+    script: 'bun run tasks/no-input.ts',
   }),
 ];
 

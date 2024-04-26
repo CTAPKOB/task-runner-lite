@@ -17,7 +17,14 @@ export const tasks = sqliteTable(
   },
   (table) => {
     return {
-      crated_at_running: index('name_idx').on(table.created_at, table.running),
+      created_at_running: index('created_at_name_idx').on(
+        table.created_at,
+        table.running
+      ),
+      running_at_created: index('name_created_at_idx').on(
+        table.running,
+        table.created_at
+      ),
     };
   }
 );
