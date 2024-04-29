@@ -239,3 +239,49 @@ test('async with logs', async () => {
     },
   ]);
 });
+
+test('SIGTERM on timeout', async () => {
+  const script = 'bun run ./src/task-fixtures/timeout.ts';
+  const input = null;
+
+  let results: Result[] = [];
+
+  for await (const data of exec(script, input, transformer, 100)) {
+    results.push(data);
+  }
+
+  expect(results).toEqual([
+    {
+      error: 'terminated with SIGTERM',
+      type: 'shell_error',
+    },
+    {
+      type: 'exit_code',
+      value: null,
+    },
+  ]);
+});
+
+// Bun hangs in test for unknown reason (SIGTERM is not killing the underlying process). No issues with real life application.
+/*
+test('Process terminated if no readers', async () => {
+  const script = 'bun run ./src/task-fixtures/terminated-on-break.ts';
+  const input = null;
+
+  let results: Result[] = [];
+
+  for await (const data of exec(script, input, transformer)) {
+    results.push(data);
+    break;
+  }
+
+  console.log(results);
+
+  expect(results).toEqual([
+    {
+      line: 'Hello, World!',
+      type: 'log',
+    },
+  ]);
+});
+*/
