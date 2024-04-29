@@ -1,7 +1,7 @@
 import { db } from './db/db';
 import { tasks } from './db/schema';
 import { eq } from 'drizzle-orm/sqlite-core/expressions';
-import { exec } from './queue/shell-zx';
+import { exec } from './queue/shell';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const sleepTimeout = 0;
@@ -44,6 +44,8 @@ while (true) {
   const { id, input, script } = res[0];
 
   console.log('Start', id, script, input);
+
+  // @todo: update logs, update result
   const output = await exec(script, input);
   console.log('Done', id, script, output);
 

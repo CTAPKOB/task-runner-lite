@@ -1,5 +1,5 @@
 import { sleep } from 'bun';
-import { response } from '~/runtime';
+import { response } from '~/io';
 
 // console.info('Hello, World!');
 // console.info('Hello, World!');

@@ -1,5 +1,5 @@
 import { Type } from '@sinclair/typebox';
-import { request, response } from '~/runtime';
+import { request, response } from '../src/io';
 
 const Input = Type.String();
 

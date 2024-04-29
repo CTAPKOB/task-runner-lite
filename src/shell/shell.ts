@@ -1,35 +1,13 @@
 import { $, ProcessOutput } from 'zx';
 import { PassThrough, compose } from 'node:stream';
+import { toLines, withType } from './stream-transformers';
 
-const createLineTransform = <T>(
-  output: 'stderr' | 'stdout',
-  transformer: (source: 'stderr' | 'stdout', line: string) => T
-) =>
-  async function* toLines(source: AsyncIterable<Buffer>) {
-    let reminder = '';
-
-    for await (const chunk of source) {
-      const lines = chunk.toString().split('\n');
-      lines[0] = reminder + lines[0];
-      reminder = lines.pop()!;
-
-      for (const line of lines) {
-        yield transformer(output, line);
-      }
-    }
-
-    if (reminder) {
-      yield transformer(output, reminder);
-    }
-  };
-
-export const exec = <T>(
+export const exec = (
   command: string,
   input: string | null,
-  transformer: (output: 'stderr' | 'stdout', line: string) => T,
   timeout: number = 60 * 10 * 1000
 ): AsyncIterable<
-  | T
+  | { type: 'stderr' | 'stdout'; line: string }
   | { type: 'exit_code'; value: number | null }
   | { type: 'shell_error'; error: string }
 > => {
@@ -45,14 +23,13 @@ export const exec = <T>(
     p$.stdin.end();
   }
 
-  compose(p$.stdout, createLineTransform('stdout', transformer)).pipe(
-    resultStream,
-    { end: false }
-  );
-  compose(p$.stderr, createLineTransform('stderr', transformer)).pipe(
-    resultStream,
-    { end: false }
-  );
+  compose(p$.stdout, toLines, withType('stdout')).pipe(resultStream, {
+    end: false,
+  });
+
+  compose(p$.stderr, toLines, withType('stderr')).pipe(resultStream, {
+    end: false,
+  });
 
   let finished = false;
 

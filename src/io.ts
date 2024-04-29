@@ -5,30 +5,14 @@ let res: string | null | void = undefined;
 
 const responseId = '::bd59-6a12051544c7::';
 
-type RunType =
-  | {
-      type: 'log';
-      line: string;
-    }
-  | {
-      type: 'error';
-      error: string;
-    }
-  | { type: 'json'; data: any };
-
-export const transformer = (
-  output: 'stderr' | 'stdout',
+export const safeParseResponse = (
   line: string
-): RunType => {
-  if (output === 'stderr') {
-    return { type: 'error', error: line };
-  }
-
+): { success: true; data: unknown } | { success: false } => {
   if (line.startsWith(responseId)) {
-    return { type: 'json', data: JSON.parse(line.slice(responseId.length)) };
+    return { success: true, data: JSON.parse(line.slice(responseId.length)) };
   }
 
-  return { type: 'log', line };
+  return { success: false };
 };
 
 export const request = async <T extends TSchema>(
@@ -61,7 +45,6 @@ export const request = async <T extends TSchema>(
   throw `Input validation error: ${error.message} at path ${error.path} with value ${error.value}`;
 };
 
-// @todo: to support logs output format should be specified
 export const response = (res: unknown) => {
   console.log(`${responseId}${JSON.stringify(res)}`);
 };

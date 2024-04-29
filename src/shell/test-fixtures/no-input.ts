@@ -1,4 +1,4 @@
-import { request, response } from '~/runtime';
+import { request, response } from '~/io';
 import assert from 'assert';
 
 const args = await request();

@@ -1,5 +1,5 @@
-import { db } from '../db/db';
-import { tasks } from '../db/schema';
+import { db } from '~/db/db';
+import { tasks } from '~/db/schema';
 
 import type { BatchItem } from 'drizzle-orm/batch';
 

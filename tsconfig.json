@@ -23,7 +23,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "exactOptionalPropertyTypes": true,
     "paths": {
-      "~/*": ["./src/queue/*"]
+      "~/*": ["./src/*"]
     }
   }
 }

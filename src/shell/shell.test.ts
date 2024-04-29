@@ -1,12 +1,22 @@
 import { expect, test } from 'bun:test';
-import { exec } from './shell-zx';
-import { transformer } from '~/runtime';
+import { exec } from './shell';
+import { safeParseResponse } from '../io';
 
 type InferAsyncReturnType<T> = T extends AsyncIterable<infer U> ? U : never;
 
-type Result = InferAsyncReturnType<
-  ReturnType<typeof exec<ReturnType<typeof transformer>>>
->;
+type ExecResult = InferAsyncReturnType<ReturnType<typeof exec>>;
+
+type Result = ExecResult | { type: 'json'; data: unknown };
+
+const convert = (input: ExecResult) => {
+  if (input.type === 'stdout') {
+    const res = safeParseResponse(input.line);
+    if (res.success) {
+      return { type: 'json', data: res.data } as const;
+    }
+  }
+  return input;
+};
 
 test('json, valid input', async () => {
   const input = JSON.stringify({
@@ -14,12 +24,12 @@ test('json, valid input', async () => {
     name: 'some name 1',
   });
 
-  const script = 'bun run ./src/task-fixtures/echo-with-validation.ts';
+  const script = 'bun run ./src/shell/test-fixtures/echo-with-validation.ts';
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
@@ -43,19 +53,18 @@ test('shell json, invalid input', async () => {
     not_exists: 'some name 1',
   });
 
-  const script = 'bun run ./src/task-fixtures/echo-with-validation.ts';
+  const script = 'bun run ./src/shell/test-fixtures/echo-with-validation.ts';
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
     {
-      type: 'error',
-      error:
-        'error: Input validation error: Required property at path /name with value undefined',
+      type: 'stderr',
+      line: 'error: Input validation error: Required property at path /name with value undefined',
     },
     {
       type: 'exit_code',
@@ -65,20 +74,19 @@ test('shell json, invalid input', async () => {
 });
 
 test('shell json, no input', async () => {
-  const script = 'bun run ./src/task-fixtures/echo-with-validation.ts';
+  const script = 'bun run ./src/shell/test-fixtures/echo-with-validation.ts';
   const input = null;
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
     {
-      type: 'error',
-      error:
-        'error: Input validation error: Expected object at path  with value null',
+      type: 'stderr',
+      line: 'error: Input validation error: Expected object at path  with value null',
     },
     {
       type: 'exit_code',
@@ -88,13 +96,13 @@ test('shell json, no input', async () => {
 });
 
 test('shell no input', async () => {
-  const script = 'bun run ./src/task-fixtures/no-input.ts';
+  const script = 'bun run ./src/shell/test-fixtures/no-input.ts';
   const input = null;
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
@@ -110,13 +118,13 @@ test('shell no input', async () => {
 });
 
 test('shell string input', async () => {
-  const script = 'bun run ./src/task-fixtures/string-input.ts';
+  const script = 'bun run ./src/shell/test-fixtures/string-input.ts';
   const input = JSON.stringify('hello world');
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
@@ -132,13 +140,13 @@ test('shell string input', async () => {
 });
 
 test('multiple input calls give same result', async () => {
-  const script = 'bun run ./src/task-fixtures/multi-input.ts';
+  const script = 'bun run ./src/shell/test-fixtures/multi-input.ts';
   const input = JSON.stringify({ a: 1 });
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
@@ -159,13 +167,13 @@ test('bash', async () => {
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
     {
-      type: 'log',
+      type: 'stdout',
       line: 'hello',
     },
     {
@@ -182,13 +190,13 @@ test('bash', async () => {
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
     {
-      type: 'log',
+      type: 'stdout',
       line: 'hel"lo',
     },
     {
@@ -199,35 +207,35 @@ test('bash', async () => {
 });
 
 test('async with logs', async () => {
-  const script = 'bun run ./src/task-fixtures/async.ts';
+  const script = 'bun run ./src/shell/test-fixtures/async.ts';
   const input = null;
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
     {
-      error: 'Error, World!',
-      type: 'error',
+      line: 'Error, World!',
+      type: 'stderr',
     },
     {
       line: 'Hello, World!2 Hello, World!',
-      type: 'log',
+      type: 'stdout',
     },
     {
-      error: '2 Error, World!',
-      type: 'error',
+      line: '2 Error, World!',
+      type: 'stderr',
     },
     {
       line: '3 Hello, World!',
-      type: 'log',
+      type: 'stdout',
     },
     {
-      error: '3 Error, World!',
-      type: 'error',
+      line: '3 Error, World!',
+      type: 'stderr',
     },
     {
       data: 'hello',
@@ -241,13 +249,13 @@ test('async with logs', async () => {
 });
 
 test('SIGTERM on timeout', async () => {
-  const script = 'bun run ./src/task-fixtures/timeout.ts';
+  const script = 'bun run ./src/shell/test-fixtures/timeout.ts';
   const input = null;
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer, 100)) {
-    results.push(data);
+  for await (const data of exec(script, input, 100)) {
+    results.push(convert(data));
   }
 
   expect(results).toEqual([
@@ -265,13 +273,13 @@ test('SIGTERM on timeout', async () => {
 // Bun hangs in test for unknown reason (SIGTERM is not killing the underlying process). No issues with real life application.
 /*
 test('Process terminated if no readers', async () => {
-  const script = 'bun run ./src/task-fixtures/terminated-on-break.ts';
+  const script = 'bun run ./src/shell/test-fixtures/terminated-on-break.ts';
   const input = null;
 
   let results: Result[] = [];
 
-  for await (const data of exec(script, input, transformer)) {
-    results.push(data);
+  for await (const data of exec(script, input, 3000)) {
+    results.push(convert(data));
     break;
   }
 
@@ -280,7 +288,7 @@ test('Process terminated if no readers', async () => {
   expect(results).toEqual([
     {
       line: 'Hello, World!',
-      type: 'log',
+      type: 'stdout',
     },
   ]);
 });
